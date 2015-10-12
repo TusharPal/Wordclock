@@ -1,5 +1,6 @@
 package com.a1kesamose.wordclock.Activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,13 +20,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.a1kesamose.wordclock.BaseObject.SquareTextView;
 import com.a1kesamose.wordclock.BaseObject.SquareView;
 import com.a1ksamose.wordclock.R;
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.SaturationBar;
+import com.soundcloud.android.crop.Crop;
 
+import java.io.File;
 
 public class ActivitySettings extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener{
     private SquareView squareViewBackgroundColor;
@@ -38,8 +42,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
 
     private SharedPreferences sharedPreferences;
     private Typeface typefaceFontAwesome;
-
-    private static final int FLAG_PICK_IMAGE_REQUEST = 0;
+    private Context context;
 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -47,6 +50,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         typefaceFontAwesome = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        context = this;
 
         squareViewBackgroundColor = (SquareView)findViewById(R.id.activity_settings_squareView_background_color_icon);
         squareViewTextColor = (SquareView)findViewById(R.id.activity_settings_squareView_text_color_icon);
@@ -105,19 +109,16 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == FLAG_PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            alertDialogBackgroundImagePicker(data.getData());
-/**
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+        if(requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK){
+            Crop.of(intent.getData(), Uri.fromFile(new File(getCacheDir(), "cropped"))).asSquare().start(this);
+        }else if(requestCode == Crop.REQUEST_CROP && resultCode == RESULT_OK){
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
- */
+            alertDialogBackgroundImagePicker(Crop.getOutput(intent));
+        }else {
+            Toast.makeText(this, Crop.getError(intent).getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -145,10 +146,11 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
                 break;
             }
             case R.id.activity_settings_textView_background_image_icon:{
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), FLAG_PICK_IMAGE_REQUEST);
+                if(sharedPreferences.getBoolean("background_image_uri_set", false)){
+                    alertDialogBackgroundImagePicker(Uri.parse(sharedPreferences.getString("background_image_uri_string", "")));
+                }else{
+                    Crop.pickImage(this);
+                }
 
                 break;
             }
@@ -300,7 +302,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.setNeutralButton("Select image", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
+                Crop.pickImage((Activity)context);
             }
         });
         builder.create().show();
