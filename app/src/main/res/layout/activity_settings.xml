@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/activity_settings_textView_clock_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/activity_settings_textView_clock_type_icon"
+        android:layout_margin="4dp"
+        android:gravity="center_vertical"
+        android:text="Clock type"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_clock_type_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="@string/fa_clock_o"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_background_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_settings_textView_clock_type"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/activity_settings_textView_background_type_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Background type"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_background_type_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_textView_clock_type_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="@string/fa_paint_brush"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_background_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_settings_textView_background_type"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/activity_settings_squareView_background_color_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Background color"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <com.a1kesamose.wordclock.BaseObject.SquareView
+        android:id="@+id/activity_settings_squareView_background_color_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_textView_background_type_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@android:color/holo_blue_dark"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_background_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/activity_settings_textView_background_color"
+        android:layout_alignBottom="@+id/activity_settings_textView_background_image_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Background image"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_background_image_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_squareView_background_color_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="@string/fa_file_image_o"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_text_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/activity_settings_textView_background_image"
+        android:layout_alignBottom="@+id/activity_settings_squareView_text_color_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Text color"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <com.a1kesamose.wordclock.BaseObject.SquareView
+        android:id="@+id/activity_settings_squareView_text_color_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_textView_background_image_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_text_alignment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/activity_settings_textView_text_color"
+        android:layout_alignBottom="@+id/activity_settings_textView_text_alignment_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Text alignment"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_text_alignment_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_squareView_text_color_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="@string/fa_align_center"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_text_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/activity_settings_textView_text_alignment"
+        android:layout_alignBottom="@+id/activity_settings_textView_text_size_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="Text size"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:id="@+id/activity_settings_textView_text_size_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/activity_settings_textView_text_alignment_icon"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="50"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+</RelativeLayout>

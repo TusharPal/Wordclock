@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Wordclock</string>
+    <string name="app_description">Live wallpaper that displays the time in words</string>
+
+    <string name="fa_clock_o">&#xf017;</string>
+    <string name="fa_font">&#xf031;</string>
+    <string name="fa_picture_o">&#xf03e;</string>
+    <string name="fa_file_image_o">&#xf1c5;</string>
+    <string name="fa_paint_brush">&#xf1fc;</string>
+    <string name="fa_align_left">&#xf036;</string>
+    <string name="fa_align_center">&#xf037;</string>
+    <string name="fa_align_right">&#xf038;</string>
+</resources>

@@ -1,0 +1,41 @@
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.a1ksamose.wordclock">
+
+    <uses-feature
+        android:name="android.software.live_wallpaper"
+        android:required="true"/>
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat">
+
+        <activity
+            android:name="com.a1kesamose.wordclock.Activity.ActivitySettings"
+            android:label="Settings"
+            android:exported="true"
+            android:configChanges="keyboardHidden|layoutDirection|screenLayout|screenSize|navigation|orientation">
+            <intent-filter>
+                <action android:name="ANDROID.INTENT.ACTION.MAIN"/>
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.a1kesamose.wordclock.Service.WordClockWallpaperService"
+            android:enabled="true"
+            android:label="Wordclock"
+            android:permission="android.permission.BIND_WALLPAPER">
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wordclockwallpaper"/>
+        </service>
+    </application>
+</manifest>
