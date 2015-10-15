@@ -19,7 +19,12 @@ public class WordClockWallpaperService extends WallpaperService implements Share
     private int textColor;
     private int clockType;
     private int textAlignment;
+    private Paint.Align paintTextAlignment;
     private float textSize;
+    private int width;
+    private int height;
+    private int x[];
+    private int y[];
 
     @Override
     public Engine onCreateEngine() {
@@ -31,6 +36,22 @@ public class WordClockWallpaperService extends WallpaperService implements Share
         textColor = sharedPreferences.getInt("text_color", Color.WHITE);
         clockType = sharedPreferences.getInt("clock_type", 0);
         textAlignment = sharedPreferences.getInt("text_alignment", 1);
+        switch(textAlignment){
+            case 0:{
+                paintTextAlignment = Paint.Align.LEFT;
+
+                break;
+            }
+            case 1:{
+                paintTextAlignment = Paint.Align.CENTER;
+                break;
+            }
+            case 2:{
+                paintTextAlignment = Paint.Align.RIGHT;
+
+                break;
+            }
+        }
         textSize = sharedPreferences.getFloat("text_size", 50f);
 
         return new WordClockWallpaperEngine();
@@ -53,6 +74,22 @@ public class WordClockWallpaperService extends WallpaperService implements Share
             clockType = sharedPreferences.getInt("clock_type", 0);
         }else if(key.equals("text_alignment")){
             textAlignment = sharedPreferences.getInt("text_alignment", 1);
+            switch(textAlignment){
+                case 0:{
+                    paintTextAlignment = Paint.Align.LEFT;
+
+                    break;
+                }
+                case 1:{
+                    paintTextAlignment = Paint.Align.CENTER;
+                    break;
+                }
+                case 2:{
+                    paintTextAlignment = Paint.Align.RIGHT;
+
+                    break;
+                }
+            }
         }else if(key.equals("text_size")){
             textSize = sharedPreferences.getFloat("text_size", 50f);
         }
@@ -61,20 +98,38 @@ public class WordClockWallpaperService extends WallpaperService implements Share
     private class WordClockWallpaperEngine extends Engine{
         private SimpleDateFormat sdfTime;
         private Paint paint;
-        private int width;
-        private int height;
         private boolean isVisible = false;
+        private Calendar calendar;
 
+        private final String minute[] = {"One", "Two", "Three", "Four", "Five",
+                                         "Six", "Seven", "Eight", "Nine", "Ten",
+                                         "Eleven", "Twelve", "Thirteen", "Fourteen", "Quarter",
+                                         "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty",
+                                         "Twenty one", "Twenty two", "Twenty three", "Twenty four", "Twenty five",
+                                         "Twenty six", "Twenty seven", "Twenty eight", "Twenty nine", "Half",
+                                         "Thirty one", "Thirty two", "Thirty three", "Thirty four", "Thirty five",
+                                         "Thirty six", "Thirty seven", "Thirty eight", "Thirty nine", "Forty",
+                                         "Forty one", "Forty two", "Forty three", "Forty four", "Ouarter",
+                                         "Forty six", "Forty seven", "Forty eight", "Forty nine", "Fifty",
+                                         "Fifty one", "Fifty two", "Fifty three", "Fifty four", "Fifty five",
+                                         "Fifty six", "Fifty seven", "Fifty eight", "Fifty nine"};
         private final Handler handler = new Handler();
         private final Runnable drawRunnable = new Runnable(){
             public void run(){
-                draw();
+                if(clockType == 0){
+                    drawDigitalClock();
+                }else if(clockType == 1){
+                    drawWordClock();
+                }
             }
         };
 
         public WordClockWallpaperEngine(){
             sdfTime = new SimpleDateFormat("HH:mm:ss");
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+            x = new int[3];
+            y = new int[4];
             paint = new Paint();
             paint.setAntiAlias(true);
             paint.setStrokeWidth(4f);
@@ -92,11 +147,19 @@ public class WordClockWallpaperService extends WallpaperService implements Share
             }
         }
 
-        public void onSurfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height){
+        public void onSurfaceChanged(SurfaceHolder surfaceHolder, int format, int w, int h){
             super.onSurfaceChanged(surfaceHolder, format, width, height);
 
-            this.width = width;
-            this.height = height;
+            width = w;
+            height = h;
+
+            x[0] = 0;
+            x[1] = width / 2;
+            x[2] = width;
+            y[0] = (height / 2) - (int)textSize;
+            y[1] = (height / 2);
+            y[2] = (height / 2) + (int)textSize;
+            y[3] = (height / 2) + (int)(2 * textSize);
         }
 
         public void onSurfaceDestroyed(SurfaceHolder surfaceHolder){
@@ -104,9 +167,83 @@ public class WordClockWallpaperService extends WallpaperService implements Share
             handler.removeCallbacks(drawRunnable);
         }
 
-        private void draw(){
+        private void drawDigitalClock(){
             SurfaceHolder surfaceHolder = getSurfaceHolder();
             Canvas canvas = null;
+
+            try{
+                canvas = surfaceHolder.lockCanvas();
+
+                paint.setColor(backgroundColor);
+                paint.setStyle(Paint.Style.FILL);
+                canvas.drawPaint(paint);
+
+                paint.setTextSize(textSize);
+                paint.setColor(textColor);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setTextAlign(paintTextAlignment);
+
+                canvas.drawText(sdfTime.format(Calendar.getInstance().getTime()), x[textAlignment], y[1], paint);
+            }catch(Exception e){
+
+            }finally{
+                if(canvas != null){
+                    surfaceHolder.unlockCanvasAndPost(canvas);
+                }
+            }
+
+            if(isVisible){
+                handler.postDelayed(drawRunnable, 1000);
+            }
+        }
+
+        private void drawWordClock(){
+            SurfaceHolder surfaceHolder = getSurfaceHolder();
+            Canvas canvas = null;
+            String timeStamp[] = {"", "", "", ""};
+            calendar = Calendar.getInstance();
+
+            if(calendar.get(Calendar.MINUTE) == 0){
+                timeStamp[0] = minute[calendar.get(Calendar.HOUR) - 1];
+                timeStamp[1] = "\'o\' clock";
+            }else if(calendar.get(Calendar.MINUTE) == 1){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "minute";
+                timeStamp[2] = "past";
+                timeStamp[3] = minute[calendar.get(Calendar.HOUR) - 1].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) > 1 && calendar.get(Calendar.MINUTE) < 15){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "minutes";
+                timeStamp[2] = "past";
+                timeStamp[3] = minute[calendar.get(Calendar.HOUR) - 1].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) == 15){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "past";
+                timeStamp[2] = minute[calendar.get(Calendar.HOUR) - 1].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) > 15 && calendar.get(Calendar.MINUTE) < 30){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "minutes";
+                timeStamp[2] = "past";
+                timeStamp[3] = minute[calendar.get(Calendar.HOUR) - 1].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) == 30){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "past";
+                timeStamp[2] = minute[calendar.get(Calendar.HOUR) - 1].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) > 30 && calendar.get(Calendar.MINUTE) < 45){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "minutes";
+                timeStamp[2] = "to";
+                timeStamp[3] = minute[calendar.get(Calendar.HOUR) % 12].toLowerCase();
+            }else if(calendar.get(Calendar.MINUTE) == 45){
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "to";
+                timeStamp[2] = minute[calendar.get(Calendar.HOUR) % 12].toLowerCase();
+            }else{
+                timeStamp[0] = minute[calendar.get(Calendar.MINUTE) - 1];
+                timeStamp[1] = "minutes";
+                timeStamp[2] = "to";
+                timeStamp[3] = minute[calendar.get(Calendar.HOUR) % 12].toLowerCase();
+            }
 
             try{
                 canvas = surfaceHolder.lockCanvas();
@@ -121,23 +258,25 @@ public class WordClockWallpaperService extends WallpaperService implements Share
                 switch(textAlignment){
                     case 0:{
                         paint.setTextAlign(Paint.Align.LEFT);
-                        canvas.drawText(sdfTime.format(Calendar.getInstance().getTime()), 0, height/2, paint);
 
                         break;
                     }
                     case 1:{
                         paint.setTextAlign(Paint.Align.CENTER);
-                        canvas.drawText(sdfTime.format(Calendar.getInstance().getTime()), width/2, height/2, paint);
 
                         break;
                     }
                     case 2:{
                         paint.setTextAlign(Paint.Align.RIGHT);
-                        canvas.drawText(sdfTime.format(Calendar.getInstance().getTime()), width, height/2, paint);
 
                         break;
                     }
                 }
+
+                canvas.drawText(timeStamp[0], x[textAlignment], y[0], paint);
+                canvas.drawText(timeStamp[1], x[textAlignment], y[1], paint);
+                canvas.drawText(timeStamp[2], x[textAlignment], y[2], paint);
+                canvas.drawText(timeStamp[3], x[textAlignment], y[3], paint);
             }catch(Exception e){
 
             }finally{
