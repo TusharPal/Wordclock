@@ -6,12 +6,12 @@
     android:layout_height="match_parent">
 
     <com.a1kesamose.wordclock.BaseObject.SquareView
-        android:id="@+id/alert_dialog_text_size_squareTextView_size_demo"
+        android:id="@+id/alert_dialog_text_size_squareTextView_thickness_demo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <EditText
-        android:id="@+id/alert_dialog_text_size_editText_size_input"
+        android:id="@+id/alert_dialog_text_size_editText_thickness_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"

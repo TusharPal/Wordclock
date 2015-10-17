@@ -5,11 +5,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -22,7 +26,6 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.a1kesamose.wordclock.BaseObject.SquareTextView;
 import com.a1kesamose.wordclock.BaseObject.SquareView;
 import com.a1ksamose.wordclock.R;
 import com.larswerkman.holocolorpicker.ColorPicker;
@@ -30,6 +33,8 @@ import com.larswerkman.holocolorpicker.SaturationBar;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ActivitySettings extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener{
     private SquareView squareViewBackgroundColor;
@@ -115,7 +120,6 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         if(requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK){
             Crop.of(intent.getData(), Uri.fromFile(new File(getCacheDir(), "cropped"))).asSquare().start(this);
         }else if(requestCode == Crop.REQUEST_CROP && resultCode == RESULT_OK){
-
             alertDialogBackgroundImagePicker(Crop.getOutput(intent));
         }else {
             Toast.makeText(this, Crop.getError(intent).getMessage(), Toast.LENGTH_SHORT).show();
@@ -126,7 +130,11 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.activity_settings_textView_background_type_icon:{
-                alertDialogBackgroundTypePicker();
+                if(sharedPreferences.getBoolean("background_image_uri_set", false)){
+                    alertDialogBackgroundTypePicker();
+                }else {
+                    Toast.makeText(getApplicationContext(), "Background image not selected!", Toast.LENGTH_LONG).show();
+                }
 
                 break;
             }
@@ -274,9 +282,9 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if(radioButtonDigital.isChecked()){
+                if(radioButtonDigital.isChecked()) {
                     sharedPreferences.edit().putInt("clock_type", 0).apply();
-                }else if(radioButtonWords.isChecked()){
+                } else if(radioButtonWords.isChecked()) {
                     sharedPreferences.edit().putInt("clock_type", 1).apply();
                 }
             }
@@ -284,7 +292,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.create().show();
     }
 
-    private void alertDialogBackgroundImagePicker(Uri uriImage){
+    private void alertDialogBackgroundImagePicker(final Uri uriImage){
         LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = layoutInflater.inflate(R.layout.alert_dialog_background_image_picker, null, false);
         ImageView imageView = (ImageView)view.findViewById(R.id.alert_dialog_background_image_picker_imageView);
@@ -296,7 +304,16 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), uriImage);
+                    FileOutputStream fos = context.openFileOutput("background_image.png", Context.MODE_PRIVATE);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.close();
+                    sharedPreferences.edit().putString("background_image_uri_string", Uri.fromFile(getFileStreamPath("background_image.png")).toString()).apply();
+                    sharedPreferences.edit().putBoolean("background_image_uri_set", true).apply();
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         builder.setNeutralButton("Select image", new DialogInterface.OnClickListener() {
@@ -359,33 +376,52 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
     private void alertDialogTextSizePicker(){
         LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = layoutInflater.inflate(R.layout.alert_dialog_text_size, null, false);
-        final SquareTextView squareTextViewDemo = (SquareTextView)view.findViewById(R.id.alert_dialog_text_size_squareTextView_size_demo);
+        final SquareView squareViewDemo = (SquareView)view.findViewById(R.id.alert_dialog_text_size_squareTextView_size_demo);
         final EditText editTextInput = (EditText)view.findViewById(R.id.alert_dialog_text_size_editText_size_input);
-        squareTextViewDemo.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50)));
-        squareTextViewDemo.setTextSize(sharedPreferences.getFloat("text_size", 50f));
+
+        final Canvas canvas = new Canvas();
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(4f);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTextSize(sharedPreferences.getFloat("text_size", 50f));
+
+        Toast.makeText(getApplicationContext(), Integer.toString(squareViewDemo.getMeasuredWidth()), Toast.LENGTH_SHORT).show();
+        canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), 100, 100, paint);
+        squareViewDemo.draw(canvas);
         editTextInput.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50f)));
+
         editTextInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if(editTextInput.getText().toString().length() > 0){
-                    squareTextViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
-                    squareTextViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
+                    squareViewDemo.invalidate();
+                    squareViewDemo.draw(canvas);
                 }
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if(editTextInput.getText().toString().length() > 0){
-                    squareTextViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
-                    squareTextViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
+                    squareViewDemo.invalidate();
+                    squareViewDemo.draw(canvas);
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 if(editTextInput.getText().toString().length() > 0){
-                    squareTextViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
-                    squareTextViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
+                    squareViewDemo.invalidate();
+                    squareViewDemo.draw(canvas);
                 }
             }
         });
