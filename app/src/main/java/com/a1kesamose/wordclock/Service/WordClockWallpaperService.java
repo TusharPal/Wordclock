@@ -50,13 +50,12 @@ public class WordClockWallpaperService extends WallpaperService{
                                          "Quarter", "Sixteen", "Seventeen", "Eighteen", "Nineteen",
                                          "Twenty", "Twenty one", "Twenty two", "Twenty three", "Twenty four",
                                          "Twenty five", "Twenty six", "Twenty seven", "Twenty eight", "Twenty nine",
-                                         "Half", "Thirty one", "Thirty two", "Thirty three", "Thirty four",
-                                         "Thirty five", "Thirty six", "Thirty seven", "Thirty eight", "Thirty nine",
-                                         "Forty", "Forty one", "Forty two", "Forty three", "Forty four",
-                                         "Ouarter", "Forty six", "Forty seven", "Forty eight", "Forty nine",
-                                         "Fifty", "Fifty one", "Fifty two", "Fifty three", "Fifty four",
-                                         "Fifty five", "Fifty six", "Fifty seven", "Fifty eight", "Fifty nine"};
-        private String timeStamp[] = {"", "", "", ""};
+                                         "Half", "Twenty nine", "Twenty eight", "Twenty seven", "Twenty six",
+                                         "Twenty five", "Twenty four", "Twenty three", "Twenty two", "Twenty one",
+                                         "Twenty", "Nineteen", "Eighteen", "Seventeen", "Sixteen",
+                                         "Quarter", "Fourteen", "Thirteen", "Twelve", "Eleven",
+                                         "Ten", "Nine", "Eight", "Seven", "Six",
+                                         "Five", "Four", "Three", "Two", "One"};
         private int x[];
         private int y[];
         private int width;
@@ -203,6 +202,7 @@ public class WordClockWallpaperService extends WallpaperService{
             SurfaceHolder surfaceHolder = getSurfaceHolder();
             Canvas canvas = null;
             calendar = Calendar.getInstance();
+            String timeStamp[] = {"", "", "", ""};
 
             if(calendar.get(Calendar.MINUTE) == 0){
                 timeStamp[0] = minute[calendar.get(Calendar.HOUR)];

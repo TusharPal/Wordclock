@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,7 +43,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
     private TextView textViewBackgroundImageIcon;
     private TextView textViewTextAlignment;
     private TextView textViewTextSize;
-
+    private TextView textViewTextThickness;
     private SharedPreferences sharedPreferences;
     private Typeface typefaceFontAwesome;
     private Context context;
@@ -64,6 +63,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         textViewBackgroundImageIcon = (TextView)findViewById(R.id.activity_settings_textView_background_image_icon);
         textViewTextAlignment = (TextView)findViewById(R.id.activity_settings_textView_text_alignment_icon);
         textViewTextSize = (TextView)findViewById(R.id.activity_settings_textView_text_size_icon);
+        textViewTextThickness = (TextView)findViewById(R.id.activity_settings_textView_text_thickness_icon);
 
         squareViewBackgroundColor.setBackgroundColor(sharedPreferences.getInt("background_color", Color.CYAN));
         squareViewTextColor.setBackgroundColor(sharedPreferences.getInt("text_color", Color.WHITE));
@@ -90,15 +90,17 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         }else if(sharedPreferences.getInt("text_alignment", 1) == 2){
             textViewTextAlignment.setText(getResources().getString(R.string.fa_align_right));
         }
-        textViewTextSize.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50f)));
+        textViewTextSize.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 4f)));
+        textViewTextThickness.setText(String.format("%.0f", sharedPreferences.getFloat("text_thickness", 50f)));
 
+        textViewClockTypeIcon.setOnClickListener(this);
+        textViewBackgroundTypeIcon.setOnClickListener(this);
         squareViewBackgroundColor.setOnClickListener(this);
         squareViewTextColor.setOnClickListener(this);
-        textViewBackgroundTypeIcon.setOnClickListener(this);
-        textViewClockTypeIcon.setOnClickListener(this);
+        textViewBackgroundImageIcon.setOnClickListener(this);
         textViewTextAlignment.setOnClickListener(this);
         textViewTextSize.setOnClickListener(this);
-        textViewBackgroundImageIcon.setOnClickListener(this);
+        textViewTextThickness.setOnClickListener(this);
     }
 
     @Override
@@ -129,6 +131,11 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         switch(view.getId()){
+            case R.id.activity_settings_textView_clock_type_icon:{
+                alertDialogClockType();
+
+                break;
+            }
             case R.id.activity_settings_textView_background_type_icon:{
                 if(sharedPreferences.getBoolean("background_image_uri_set", false)){
                     alertDialogBackgroundTypePicker();
@@ -148,11 +155,6 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
 
                 break;
             }
-            case R.id.activity_settings_textView_clock_type_icon:{
-                alertDialogClockType();
-
-                break;
-            }
             case R.id.activity_settings_textView_background_image_icon:{
                 if(sharedPreferences.getBoolean("background_image_uri_set", false)){
                     alertDialogBackgroundImagePicker(Uri.parse(sharedPreferences.getString("background_image_uri_string", "")));
@@ -169,6 +171,11 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
             }
             case R.id.activity_settings_textView_text_size_icon:{
                 alertDialogTextSizePicker();
+
+                break;
+            }
+            case R.id.activity_settings_textView_text_thickness_icon:{
+                alertDialogTextThicknessPicker();
 
                 break;
             }
@@ -307,7 +314,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), uriImage);
                     FileOutputStream fos = context.openFileOutput("background_image.png", Context.MODE_PRIVATE);
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                     fos.close();
                     sharedPreferences.edit().putString("background_image_uri_string", Uri.fromFile(getFileStreamPath("background_image.png")).toString()).apply();
                     sharedPreferences.edit().putBoolean("background_image_uri_set", true).apply();
@@ -319,7 +326,7 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.setNeutralButton("Select image", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Crop.pickImage((Activity)context);
+                Crop.pickImage((Activity) context);
             }
         });
         builder.create().show();
@@ -361,11 +368,11 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if(radioButtonLeft.isChecked()){
+                if(radioButtonLeft.isChecked()) {
                     sharedPreferences.edit().putInt("text_alignment", 0).apply();
-                }else if(radioButtonCenter.isChecked()){
+                } else if(radioButtonCenter.isChecked()) {
                     sharedPreferences.edit().putInt("text_alignment", 1).apply();
-                }else{
+                } else {
                     sharedPreferences.edit().putInt("text_alignment", 2).apply();
                 }
             }
@@ -378,29 +385,21 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
         View view = layoutInflater.inflate(R.layout.alert_dialog_text_size, null, false);
         final SquareView squareViewDemo = (SquareView)view.findViewById(R.id.alert_dialog_text_size_squareTextView_size_demo);
         final EditText editTextInput = (EditText)view.findViewById(R.id.alert_dialog_text_size_editText_size_input);
-
         final Canvas canvas = new Canvas();
-        final Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(4f);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setColor(Color.WHITE);
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setTextSize(sharedPreferences.getFloat("text_size", 50f));
 
-        Toast.makeText(getApplicationContext(), Integer.toString(squareViewDemo.getMeasuredWidth()), Toast.LENGTH_SHORT).show();
-        canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), 100, 100, paint);
+        squareViewDemo.setTextThickness(sharedPreferences.getFloat("text_thickness", 4f));
+        squareViewDemo.setTextSize(sharedPreferences.getFloat("text_size", 50f));
+        squareViewDemo.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50f)));
         squareViewDemo.draw(canvas);
+
         editTextInput.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50f)));
 
         editTextInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if(editTextInput.getText().toString().length() > 0){
-                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
-                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
-                    squareViewDemo.invalidate();
+                    squareViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
                     squareViewDemo.draw(canvas);
                 }
             }
@@ -408,9 +407,8 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if(editTextInput.getText().toString().length() > 0){
-                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
-                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
-                    squareViewDemo.invalidate();
+                    squareViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
                     squareViewDemo.draw(canvas);
                 }
             }
@@ -418,9 +416,8 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
             @Override
             public void afterTextChanged(Editable editable) {
                 if(editTextInput.getText().toString().length() > 0){
-                    paint.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
-                    canvas.drawText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())), squareViewDemo.getWidth() / 2, squareViewDemo.getHeight() / 2, paint);
-                    squareViewDemo.invalidate();
+                    squareViewDemo.setTextSize(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
                     squareViewDemo.draw(canvas);
                 }
             }
@@ -433,6 +430,61 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 sharedPreferences.edit().putFloat("text_size", Float.parseFloat(editTextInput.getText().toString())).apply();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void alertDialogTextThicknessPicker(){
+        LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = layoutInflater.inflate(R.layout.alert_dialog_text_thickness, null, false);
+        final SquareView squareViewDemo = (SquareView)view.findViewById(R.id.alert_dialog_text_size_squareTextView_thickness_demo);
+        final EditText editTextInput = (EditText)view.findViewById(R.id.alert_dialog_text_size_editText_thickness_input);
+
+        final Canvas canvas = new Canvas();
+        squareViewDemo.setTextThickness(sharedPreferences.getFloat("text_thickness", 4f));
+        squareViewDemo.setTextSize(sharedPreferences.getFloat("text_size", 50f));
+        squareViewDemo.setText(String.format("%.0f", sharedPreferences.getFloat("text_thickness", 4f)));
+        squareViewDemo.draw(canvas);
+
+        editTextInput.setText(String.format("%.0f", sharedPreferences.getFloat("text_thickness", 4f)));
+
+        editTextInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(editTextInput.getText().toString().length() > 0) {
+                    squareViewDemo.setTextThickness(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
+                    squareViewDemo.draw(canvas);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(editTextInput.getText().toString().length() > 0) {
+                    squareViewDemo.setTextThickness(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
+                    squareViewDemo.draw(canvas);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if(editTextInput.getText().toString().length() > 0) {
+                    squareViewDemo.setTextThickness(Float.parseFloat(editTextInput.getText().toString()));
+                    squareViewDemo.setText(String.format("%.0f", Float.parseFloat(editTextInput.getText().toString())));
+                    squareViewDemo.draw(canvas);
+                }
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set text size");
+        builder.setView(view);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                sharedPreferences.edit().putFloat("text_thickness", Float.parseFloat(editTextInput.getText().toString())).apply();
             }
         });
         builder.create().show();
@@ -466,6 +518,8 @@ public class ActivitySettings extends AppCompatActivity implements View.OnClickL
             }
         }else if(key.equals("text_size")){
             textViewTextSize.setText(String.format("%.0f", sharedPreferences.getFloat("text_size", 50f)));
+        }else if(key.equals("text_thickness")){
+            textViewTextThickness.setText(String.format("%.0f", sharedPreferences.getFloat("text_thickness", 4f)));
         }
     }
 }
