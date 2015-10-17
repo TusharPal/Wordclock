@@ -32,7 +32,7 @@ public class WordClockWallpaperService extends WallpaperService{
         private int textAlignment;
         private Paint.Align paintTextAlignment;
         private float textSize;
-        private int textThickness;
+        private float textThickness;
 
         private Bitmap bitmap;
         private Rect sourceRect;
@@ -108,7 +108,7 @@ public class WordClockWallpaperService extends WallpaperService{
                 }
             }
             textSize = sharedPreferences.getFloat("text_size", 50f);
-
+            textThickness = sharedPreferences.getFloat("text_thickness", 4f);
             sdfTime = new SimpleDateFormat("HH:mm:ss");
 
             x = new int[3];
@@ -116,7 +116,6 @@ public class WordClockWallpaperService extends WallpaperService{
 
             paint = new Paint();
             paint.setAntiAlias(true);
-            paint.setStrokeWidth(4f);
             paint.setStrokeJoin(Paint.Join.ROUND);
 
             handler.post(drawRunnable);
@@ -179,6 +178,7 @@ public class WordClockWallpaperService extends WallpaperService{
                     }
                 }
 
+                paint.setStrokeWidth(textThickness);
                 paint.setTextSize(textSize);
                 paint.setColor(textColor);
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -281,6 +281,7 @@ public class WordClockWallpaperService extends WallpaperService{
                     }
                 }
 
+                paint.setStrokeWidth(textThickness);
                 paint.setTextSize(textSize);
                 paint.setColor(textColor);
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -344,6 +345,8 @@ public class WordClockWallpaperService extends WallpaperService{
                 }
             }else if(key.equals("text_size")){
                 textSize = sharedPreferences.getFloat("text_size", 50f);
+            }else if(key.equals("text_thickness")){
+                textThickness = sharedPreferences.getFloat("text_thickness", 4f);
             }
         }
     }
